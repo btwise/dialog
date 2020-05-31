@@ -27,14 +27,14 @@ int main(int argc, char **argv)
       {"help",    no_argument,       0, 'h'},
       {"version", no_argument,       0, 'v'},
       {"title",   required_argument, 0, 't'},
-      {"css",     required_argument, 0, 'c'},
+      {"theme",   required_argument, 0, 'T'},
       {0, 0, 0, 0}
     };
 
     // getopt_long stores the option index here
     int option_index = 0;
 
-    c = getopt_long(argc, argv, "myt:c:hv", long_options, &option_index);
+    c = getopt_long(argc, argv, "myt:T:hv", long_options, &option_index);
 
     if (c == -1) // Detect the end of the options
       break;
@@ -55,7 +55,7 @@ int main(int argc, char **argv)
         caption = optarg;
         break;
 
-      case 'c':
+      case 'T':
         css_filename = optarg;
         break;
 
@@ -95,25 +95,37 @@ int main(int argc, char **argv)
       abort();
     }
 
-	// affichage
-	gtk_widget_show_all(main_window);
-  // lancement de la boucle infinie
-	gtk_main();
+	gtk_widget_show_all(main_window); // display all
+	gtk_main(); // Start infinite loop
 
   exit (0);
 }
 
 GtkWidget *st_gui_init(char *caption, char *css_filename)
 {
-  UNUSED(css_filename); // provisional
+  GtkCssProvider *provider;
+  GdkDisplay *display;
+  GdkScreen *screen;
 
 	gtk_init(NULL, NULL);
-  GtkWidget *mainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  GtkWidget *w = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  g_signal_connect(GTK_WIDGET (w), "destroy", G_CALLBACK (gtk_main_quit), NULL);
+  if (css_filename)
+  {
+    provider = gtk_css_provider_new();
+    display = gdk_display_get_default();
+    screen = gdk_display_get_default_screen(display);
+    gtk_style_context_add_provider_for_screen(screen,
+        GTK_STYLE_PROVIDER(provider),
+        GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_css_provider_load_from_file(GTK_CSS_PROVIDER(provider),
+                g_file_new_for_commandline_arg(css_filename), NULL);
+  }
   if (caption)
-    gtk_window_set_title(GTK_WINDOW(mainWindow), caption);
-	gtk_window_set_default_size(GTK_WINDOW(mainWindow), -1, -1);
-	gtk_window_move(GTK_WINDOW(mainWindow), 1150, 0);
-  return mainWindow;
+    gtk_window_set_title(GTK_WINDOW(w), caption);
+	gtk_window_set_default_size(GTK_WINDOW(w), -1, -1);
+	gtk_window_move(GTK_WINDOW(w), 1150, 0);
+  return w;
 }
 
 void st_usage(char *my_name)

@@ -41,14 +41,18 @@ int dlg_menu_widget(GtkWidget *mainWindow, int first, int last, char**argv)
   for (current_item = first_item ; current_item ; current_item = current_item->next)
   {
     current_item->button = gtk_button_new_with_mnemonic(current_item->label);
+    GtkStyleContext *context = gtk_widget_get_style_context(current_item->button);
+    gtk_style_context_add_class(context, "menu_button");
     gtk_box_pack_start(GTK_BOX(box), current_item->button , TRUE, TRUE, 0);
     g_signal_connect(G_OBJECT(current_item->button), "clicked", G_CALLBACK(st_doAction), current_item);
   }
 
   // bouton quitter systématique
- 	GtkWidget *bQuit = gtk_button_new_with_mnemonic ("_Quitter");
-  gtk_box_pack_start(GTK_BOX(box), bQuit, TRUE, TRUE, 0);
-  g_signal_connect(G_OBJECT(bQuit), "clicked", G_CALLBACK(st_doQuit), mainWindow);
+ 	GtkWidget *button_quit = gtk_button_new_with_mnemonic ("_Quitter");
+  GtkStyleContext *context = gtk_widget_get_style_context(button_quit);
+  gtk_style_context_add_class(context, "menu_button");
+  gtk_box_pack_start(GTK_BOX(box), button_quit, TRUE, TRUE, 0);
+  g_signal_connect(G_OBJECT(button_quit), "clicked", G_CALLBACK(st_doQuit), mainWindow);
   return(1);
 }
 
