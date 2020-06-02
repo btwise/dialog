@@ -11,32 +11,40 @@ typedef struct _item
   struct _item *next;
 } item;
 
-int dlg_menu_widget(GtkWidget *mainWindow, int first, int last, char**argv)
+int dlg_menu_widget(dlg_params *running_params)
 {
   item *first_item, *current_item, *last_item;
   first_item =  current_item = last_item = 0 ;
-  if (first < last)
+  if (running_params->first < running_params->last)
     {
-      while (first < last)
+      while (running_params->first < running_params->last)
       {
         current_item = (item *)malloc(sizeof(item));
-        current_item ->action = argv[first++];
-        current_item ->label = argv[first++];
-        current_item ->next = 0;
+        current_item->action = running_params->argv[running_params->first++];
+        current_item->label = running_params->argv[running_params->first++];
+        current_item->next = 0;
 
-        if (!first_item) first_item = last_item = current_item ;
+        if (!first_item)
+          first_item = last_item = current_item ;
         else
         {
           last_item->next = current_item;
           last_item = current_item;
         }
       } 
-      putchar('\n');
     }
   else return (0);
 
+	gtk_init(NULL, NULL);
+  GtkWidget *main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  g_signal_connect(GTK_WIDGET (main_window), "destroy", G_CALLBACK (gtk_main_quit), NULL);
 	GtkWidget *box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_container_add(GTK_CONTAINER(mainWindow), box);
+	gtk_container_add(GTK_CONTAINER(main_window), box);
+
+  dlg_set_css(running_params);
+  if (running_params->caption)
+    gtk_window_set_title(GTK_WINDOW(main_window), running_params->caption);
+	gtk_window_set_default_size(GTK_WINDOW(main_window), -1, -1);
 
   for (current_item = first_item ; current_item ; current_item = current_item->next)
   {
@@ -52,7 +60,25 @@ int dlg_menu_widget(GtkWidget *mainWindow, int first, int last, char**argv)
   GtkStyleContext *context = gtk_widget_get_style_context(button_quit);
   gtk_style_context_add_class(context, "menu_button");
   gtk_box_pack_start(GTK_BOX(box), button_quit, TRUE, TRUE, 0);
-  g_signal_connect(G_OBJECT(button_quit), "clicked", G_CALLBACK(st_doQuit), mainWindow);
+  g_signal_connect(G_OBJECT(button_quit), "clicked", G_CALLBACK(st_doQuit), main_window);
+
+  /*
+  int root_x, root_y;
+  gtk_window_set_position (GTK_WINDOW(main_window), GTK_WIN_POS_CENTER);
+  gtk_window_get_position(GTK_WINDOW(main_window), &root_x, &root_y);
+  gtk_window_move(GTK_WINDOW(main_window), root_x, 0);
+  GdkRectangle workarea = {0};
+  gdk_monitor_get_workarea( gdk_display_get_primary_monitor(gdk_display_get_default()), &workarea);
+  printf ("W: %u x H:%u\n", workarea.width, workarea.height);
+  gtk_window_set_gravity (GTK_WINDOW(main_window), GDK_GRAVITY_NORTH);
+  gtk_window_move(GTK_WINDOW(main_window), workarea.width / 2, 0);
+  */
+  gtk_window_move(GTK_WINDOW(main_window), 0, 0);
+
+
+  gtk_widget_show_all(main_window); // display all
+  gtk_main(); // Start infinite loop
+
   return(1);
 }
 
@@ -60,7 +86,8 @@ static void st_doAction(GtkWidget *widget, gpointer user_data)
 {
   UNUSED(widget);
   item *it = user_data;
-  printf("%s\n", it->action);
+  puts(it->action);
+  gtk_main_quit();
 }
 
 static void st_doQuit(GtkWidget *widget, gpointer user_data)
@@ -77,11 +104,10 @@ static void st_doQuit(GtkWidget *widget, gpointer user_data)
   switch(gtk_dialog_run(GTK_DIALOG(w)))
   {
     case GTK_RESPONSE_YES:
-        gtk_main_quit();
-        break;
-    case GTK_RESPONSE_NONE:
-    case GTK_RESPONSE_NO:
-        gtk_widget_destroy(w);
-        break;
+      gtk_main_quit();
+      break;
+    default:
+      break;
   }
+  gtk_widget_destroy(w);
 }

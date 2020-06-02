@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 BdD=(\
   'compile:Compiler'
@@ -18,7 +18,8 @@ function compile()
 
 function run()
 {
-  LANG=$2 ./dialog --caption "Sauvegarde" --yesno "Sauvegarder\n$(for f in ${fichiers[@]} ; do echo "- $f"; done)\nDans ${svgFile} ?"
+  echo "Rien à tester" ; read rep ; return
+  LANG=$2 ./dialog --caption "Pour test" --yesno "Sauvegarder\n$(for f in ${fichiers[@]} ; do echo "- $f"; done)\nDans ${svgFile} ?"
 }
 
 ##############################
@@ -29,12 +30,16 @@ function save_src()
   fichiers=(\
     dlg.css
     dlg.h
+    dlg-common.c
     dlg-main.c
     dlg-menu.c
+    dlg-yesno.c
     dlg.sh
     Makefile
     )
-  if kdialog --title "Sauvegarde" --yesnocancel "Sauvegarder\n$(for f in ${fichiers[@]} ; do echo "- $f"; done)\nDans ${svgFile} ?" ; then
+msg="Sauvegarder\n\n$(for f in ${fichiers[@]} ; do echo "- $f"; done)\n\nDans ${svgFile} ?"
+  if ./dialog --caption "Sauvegarde" --yesno "$msg"
+	then
     tar -czvf ${svgFile} ${fichiers[@]}
   fi
 }
