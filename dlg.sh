@@ -30,7 +30,7 @@ function save_src()
   fichiers=(\
     dlg.css
     dlg.h
-    dlg-common.c
+    dlg_common.c
     dlg-main.c
     dlg-menu.c
     dlg-yesno.c
