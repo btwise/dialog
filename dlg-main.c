@@ -4,6 +4,7 @@
 
 static void st_usage(char *my_name);
 static void st_version(char *my_name);
+static int st_decode_coordinates(char* s, int *x, int *y);
 dlg_params *dlg_params_new(void);
 
 int main(int argc, char **argv)
@@ -17,12 +18,14 @@ int main(int argc, char **argv)
   {
     static struct option long_options[] =
     {
-      {"menu",    no_argument,       &wish_widget, 'm'},
-      {"yesno",   no_argument,       &wish_widget, 'y'},
-      {"help",    no_argument,       0, 'h'},
-      {"version", no_argument,       0, 'v'},
-      {"caption", required_argument, 0, 'c'},
-      {"theme",   required_argument, 0, 'T'},
+      {"menu",     no_argument,       &wish_widget, 'm'},
+      {"yesno",    no_argument,       &wish_widget, 'y'},
+      {"help",     no_argument,       0, 'h'},
+      {"version",  no_argument,       0, 'v'},
+      {"caption",  required_argument, 0, 'c'},
+      {"position", required_argument, 0, 'p'},
+      {"size",     required_argument, 0, 's'},
+      {"theme",    required_argument, 0, 'T'},
       {0, 0, 0, 0}
     };
 
@@ -43,6 +46,22 @@ int main(int argc, char **argv)
         running_params->caption = optarg;
         break;
 
+      case 'p':
+        if (!st_decode_coordinates(optarg, &running_params->posx, &running_params->posy))
+        {
+          st_usage(argv[0]);
+          run = FALSE;
+        }
+        break;
+
+      case 's':
+        if (!st_decode_coordinates(optarg, &running_params->width, &running_params->height))
+        {
+          st_usage(argv[0]);
+          run = FALSE;
+        }
+        break;
+
       case 'T':
         running_params->css_filename = optarg;
         break;
@@ -58,6 +77,7 @@ int main(int argc, char **argv)
         break;
 
       case '?': // getopt_long already printed an error message
+        run = FALSE;
         break;
 
       default:
@@ -99,7 +119,10 @@ void st_usage(char *my_name)
   printf("%s :\n", my_name); 
   puts ("\t--menu");
   puts ("\t--yesno");
+  puts ("\t--caption=<caption-string>");
   puts ("\t--theme=<css-file>");
+  puts ("\t--position=<x-value>x<y-value>");
+  puts ("\t--size=<x-value>x<y-value>");
   puts ("\t--help");
   puts ("\t--version");
 }
@@ -114,9 +137,21 @@ dlg_params *dlg_params_new(void)
   dlg_params *p = (dlg_params *)malloc(sizeof(dlg_params));
   p->caption = 0;
   p->css_filename = 0;
+  p->posx = -1;
+  p->posy = -1;
+  p->width = -1;
+  p->height = -1;
   p->first = 0;
   p->last = 0;
   p->argv = 0;
   return (p);
 }
 
+static int st_decode_coordinates(char *s, int *x, int *y)
+{
+  gchar **v = g_strsplit_set(s, "xX", 2);
+  if (v[0]) *x = atoi(v[0]);
+  if (v[1]) *y = atoi(v[1]);
+  g_strfreev(v);
+  return((*x == -1 || *y == -1) ? FALSE : TRUE) ;
+}

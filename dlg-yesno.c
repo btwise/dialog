@@ -1,14 +1,14 @@
 #include <dlg.h>
 
-static char *st_translate(char *string);
-
 int dlg_yesno_widget(dlg_params *running_params)
 {
   int status = 0;
-  char *title = 0 ;
+#define BUFSIZE 1024
+  char title[BUFSIZE] = { 0 };
   while (running_params->first < running_params->last)
-    title = g_strdup_printf("%s ", running_params->argv[running_params->first++]);
-  title = st_translate(title);
+    g_strlcat(title, running_params->argv[running_params->first++], BUFSIZE);
+  translate(title);
+#undef BUFSIZE
 
 	gtk_init(NULL, NULL);
   GtkWidget *box = gtk_message_dialog_new(0,
@@ -17,12 +17,11 @@ int dlg_yesno_widget(dlg_params *running_params)
       GTK_BUTTONS_YES_NO,
       title
       );
-  g_free(title);
 
   dlg_set_css(running_params);
-
-  if (running_params->caption)
-    gtk_window_set_title(GTK_WINDOW(box), running_params->caption);
+  dlg_window_set_caption(GTK_WINDOW(box), running_params);
+  dlg_window_move(GTK_WINDOW(box), running_params);
+  dlg_window_resize(GTK_WINDOW(box), running_params);
 
   switch(gtk_dialog_run(GTK_DIALOG(box)))
   {
@@ -35,56 +34,4 @@ int dlg_yesno_widget(dlg_params *running_params)
   }
   gtk_widget_destroy(box);
   return(status);
-}
-
-static char *st_translate(char *string)
-{
-  char *here=string;
-  size_t len=strlen(string);
-  int num;
-  int numlen;
-
-  while (NULL != (here = strchr(here,'\\')))
-  {
-    numlen=1;
-    switch (here[1])
-    {
-    case '\\':
-          break;
-    case 'r':
-          *here = '\r';
-          break;
-    case 'n':
-          *here = '\n';
-          break;
-    case 't':
-          *here = '\t';
-          break;
-    case 'v':
-          *here = '\v';
-          break;
-    case 'a':
-          *here = '\a';
-          break;
-    case '0':
-    case '1':
-    case '2':
-    case '3':
-    case '4':
-    case '5':
-    case '6':
-    case '7':
-          numlen = sscanf(here,"%o",&num);
-          *here = (char)num;
-          break;
-    case 'x':
-          numlen = sscanf(here,"%x",&num);
-          *here = (char) num;
-          break;
-    }
-    num = here - string + numlen;
-    here++;
-    memmove(here, here + numlen, len - num);
-  }
-  return string;
 }

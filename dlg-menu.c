@@ -37,14 +37,14 @@ int dlg_menu_widget(dlg_params *running_params)
 
 	gtk_init(NULL, NULL);
   GtkWidget *main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-  g_signal_connect(GTK_WIDGET (main_window), "destroy", G_CALLBACK (gtk_main_quit), NULL);
+  g_signal_connect(GTK_WIDGET(main_window), "destroy", G_CALLBACK (gtk_main_quit), NULL);
 	GtkWidget *box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_container_add(GTK_CONTAINER(main_window), box);
 
   dlg_set_css(running_params);
-  if (running_params->caption)
-    gtk_window_set_title(GTK_WINDOW(main_window), running_params->caption);
-	gtk_window_set_default_size(GTK_WINDOW(main_window), -1, -1);
+  dlg_window_set_caption(GTK_WINDOW(main_window), running_params);
+  dlg_window_move(GTK_WINDOW(main_window), running_params);
+  dlg_window_resize(GTK_WINDOW(main_window), running_params);
 
   for (current_item = first_item ; current_item ; current_item = current_item->next)
   {
@@ -61,20 +61,6 @@ int dlg_menu_widget(dlg_params *running_params)
   gtk_style_context_add_class(context, "menu_button");
   gtk_box_pack_start(GTK_BOX(box), button_quit, TRUE, TRUE, 0);
   g_signal_connect(G_OBJECT(button_quit), "clicked", G_CALLBACK(st_doQuit), main_window);
-
-  /*
-  int root_x, root_y;
-  gtk_window_set_position (GTK_WINDOW(main_window), GTK_WIN_POS_CENTER);
-  gtk_window_get_position(GTK_WINDOW(main_window), &root_x, &root_y);
-  gtk_window_move(GTK_WINDOW(main_window), root_x, 0);
-  GdkRectangle workarea = {0};
-  gdk_monitor_get_workarea( gdk_display_get_primary_monitor(gdk_display_get_default()), &workarea);
-  printf ("W: %u x H:%u\n", workarea.width, workarea.height);
-  gtk_window_set_gravity (GTK_WINDOW(main_window), GDK_GRAVITY_NORTH);
-  gtk_window_move(GTK_WINDOW(main_window), workarea.width / 2, 0);
-  */
-  gtk_window_move(GTK_WINDOW(main_window), 0, 0);
-
 
   gtk_widget_show_all(main_window); // display all
   gtk_main(); // Start infinite loop
