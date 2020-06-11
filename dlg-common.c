@@ -19,7 +19,7 @@ void dlg_set_css(dlg_params *running_params)
   }
 }
 
-char *translate(char *string)
+char *dlg_translate(char *string)
 {
   char *here=string;
   size_t len=strlen(string);
@@ -69,6 +69,20 @@ char *translate(char *string)
     memmove(here, here + numlen, len - num);
   }
   return string;
+}
+
+void display_running_params(dlg_params *p)
+{
+  printf("     caption=%s\n", p->caption);
+  printf("       title=%s\n", p->title);
+  printf("css_filename=%s\n", p->css_filename);
+  printf("        posx=%d\n", p->posx);
+  printf("        posy=%d\n", p->posy);
+  printf("       width=%d\n", p->width);
+  printf("      height=%d\n", p->height);
+  printf("       first=%d\n", p->first);
+  printf("        last=%d\n", p->last);
+  printf("        argv=%ld\n", (long int)p->argv);
 }
 
 void dlg_window_set_caption(GtkWindow *w, dlg_params *running_params)

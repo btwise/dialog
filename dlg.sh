@@ -18,8 +18,18 @@ function compile()
 
 function run()
 {
-  echo "Rien à tester" ; read rep ; return
-  LANG=$2 ./dialog --caption "Pour test" --yesno "Sauvegarder\n$(for f in ${fichiers[@]} ; do echo "- $f"; done)\nDans ${svgFile} ?"
+#LANG=$2 ./dialog --caption "Pour test" --yesno "Sauvegarder\n$(for f in ${fichiers[@]} ; do echo "- $f"; done)\nDans ${svgFile} ?"
+  ./dialog\
+    --pos=1000x500a\
+    --caption="AhAh"\
+    --title "Joli titre :-)"\
+    --list\
+    AA aaaaaaaaa\
+    BB bbbbbbbbb\
+    CC ccccccccc\
+    DD dddddddddddddd\
+    EE eeeeeeeee\
+    FF fffffffffffff
 }
 
 ##############################
@@ -49,7 +59,11 @@ msg="Sauvegarder\n\n$(for f in ${fichiers[@]} ; do echo "- $f"; done)\n\nDans ${
 i=0
 nbr=${#BdD[@]}
 
-var="./dialog --caption 'Ooohh !!' --theme=dlg.css --menu $(while (($i < $nbr)) ; do echo -n " '${BdD[$i]%:*}' '${BdD[$i]#*:}' " ; ((i++)) ; done)"
+var="./dialog\
+     --caption='Ooohh !!'\
+     --position='873x0'
+     --theme='dlg.css'\
+     --menu $(while (($i < $nbr)) ; do echo -n " '${BdD[$i]%:*}' '${BdD[$i]#*:}' " ; ((i++)) ; done)"
 while rep=$(eval $var)
   do
     case $rep in

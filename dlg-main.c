@@ -18,14 +18,16 @@ int main(int argc, char **argv)
   {
     static struct option long_options[] =
     {
-      {"menu",     no_argument,       &wish_widget, 'm'},
-      {"yesno",    no_argument,       &wish_widget, 'y'},
-      {"help",     no_argument,       0, 'h'},
-      {"version",  no_argument,       0, 'v'},
-      {"caption",  required_argument, 0, 'c'},
-      {"position", required_argument, 0, 'p'},
-      {"size",     required_argument, 0, 's'},
-      {"theme",    required_argument, 0, 'T'},
+      {"menu",      no_argument,       &wish_widget, DLG_MENU},
+      {"yesno",     no_argument,       &wish_widget, DLG_YESNO},
+      {"list",      no_argument,       &wish_widget, DLG_LIST},
+      {"help",      no_argument,       0, DLG_HELP},
+      {"version",   no_argument,       0, DLG_VERSION},
+      {"caption",   required_argument, 0, DLG_CAPTION},
+      {"title",     required_argument, 0, DLG_TITLE},
+      {"position",  required_argument, 0, DLG_POSITION},
+      {"size",      required_argument, 0, DLG_SIZE},
+      {"theme",     required_argument, 0, DLG_THEME},
       {0, 0, 0, 0}
     };
 
@@ -42,11 +44,15 @@ int main(int argc, char **argv)
       case 0: // option which set a flag, do nothing else now
         break;
 
-      case 'c':
+      case DLG_CAPTION:
         running_params->caption = optarg;
         break;
 
-      case 'p':
+      case DLG_TITLE:
+        running_params->title = optarg;
+        break;
+
+      case DLG_POSITION:
         if (!st_decode_coordinates(optarg, &running_params->posx, &running_params->posy))
         {
           st_usage(argv[0]);
@@ -54,7 +60,7 @@ int main(int argc, char **argv)
         }
         break;
 
-      case 's':
+      case DLG_SIZE:
         if (!st_decode_coordinates(optarg, &running_params->width, &running_params->height))
         {
           st_usage(argv[0]);
@@ -62,16 +68,16 @@ int main(int argc, char **argv)
         }
         break;
 
-      case 'T':
+      case DLG_THEME:
         running_params->css_filename = optarg;
         break;
 
-      case 'h':
+      case DLG_HELP:
         st_usage(argv[0]);
         run = FALSE;
         break;
 
-      case 'v':
+      case DLG_VERSION:
         st_version(argv[0]);
         run = FALSE;
         break;
@@ -99,11 +105,14 @@ int main(int argc, char **argv)
   {
     switch (wish_widget)
       {
-      case 'm' :
+      case DLG_MENU :
         run = dlg_menu_widget(running_params);
         break;
-      case 'y' :
+      case DLG_YESNO :
         run = dlg_yesno_widget(running_params);
+        break;
+      case DLG_LIST :
+        run = dlg_list_widget(running_params);
         break;
       default:
         abort();
@@ -119,7 +128,9 @@ void st_usage(char *my_name)
   printf("%s :\n", my_name); 
   puts ("\t--menu");
   puts ("\t--yesno");
+  puts ("\t--list");
   puts ("\t--caption=<caption-string>");
+  puts ("\t--title=<title-string>");
   puts ("\t--theme=<css-file>");
   puts ("\t--position=<x-value>x<y-value>");
   puts ("\t--size=<x-value>x<y-value>");
